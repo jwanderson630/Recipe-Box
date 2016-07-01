@@ -1,0 +1,13 @@
+.hidden {
+  display: hidden;
+}
+
+.title {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  font-family: arimo, san-serif;
+}
+
+body {
+  font-family: arimo;
+}

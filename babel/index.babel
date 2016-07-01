@@ -1,0 +1,227 @@
+var rec = [{"idNum": 0, "name":"Chocolate Chip Cookies","ing":["Flour","Sugar","Salt","Eggs","Chocolate Chips"]}, {"idNum": 1, "name":"Pizza","ing":["Flour","Sugar","Salt","Water","Cheese","Pizza Sauce"]}, {"idNum": 3, "name":"Pasta","ing":["Pasta","Sauce"]}];
+var items = {};
+var setStorage =function() {
+  if (localStorage.getItem("_yoej262_item") === "undefined"){
+    localStorage.setItem("_yoej262_item", JSON.stringify(rec));
+    items = JSON.parse(localStorage.getItem("_yoej262_item"));
+  } else {
+    items = JSON.parse(localStorage.getItem("_yoej262_item")); 
+  }
+};
+
+setStorage();
+
+
+var RecipeBox = React.createClass({
+  getInitialState: function() {
+    return {
+      items: this.props.items,
+      idNum: Math.floor(Math.random() * 10000) + 10000,
+      newName: ""
+    }
+  },
+  getRecipeName: function(e){
+    this.setState({
+      newName: e.target.value
+    })
+  },
+  getIngredientNames: function(e){
+    this.setState({
+      newIngredients: e.target.value.split(",")
+    })
+  },
+  getNewRecipe: function(){
+    var name = this.state.newName;
+    if (name === "") {
+      name = "Untitled"
+    };
+    var newRecipe = {"idNum" : this.state.idNum, "name": name, "ing":this.state.newIngredients};
+    this.setState({
+      items: this.state.items.concat([newRecipe]),
+      newIngredients: [],
+      newName: "",
+      idNum: this.state.idNum + 1
+    });
+  },
+  render: function() {
+    localStorage.setItem("_yoej262_item", JSON.stringify(this.state.items));
+    return (
+      <div className="container-fluid">
+        <h1 className="title">Recipe Box:</h1>
+        <div className="modal fade" id="addModal" role="dialog">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal">&times;</button>
+                <h4>Add Recipe</h4>
+              </div>
+              <div className="modal-body">
+                <form role="from">
+                  <div className="form-group">
+                    <label for="name">Name:</label>
+                    <input require="true" placeholder="Recipe name" value={this.state.newName} type="name" className="form-control" id="name" onChange={this.getRecipeName}></input>
+                      </div>
+                  <div className="form-group">
+                    <label for="ingredients">Ingredients:</label>
+                    <input placeholder="Separate,ingredients,by,commas" type="ingredients" className="form-control" require="true" id="ingredients" value={this.state.newIngredients} onChange={this.getIngredientNames}></input>
+                      </div>
+                  <button type="button" className="btn btn-default" onClick={this.getNewRecipe} data-dismiss="modal">Submit</button>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+                    
+                <div className="well">
+        <RecipeList items={this.state.items}/>
+      </div>
+      <button onClick={this.addItem} className="btn btn-primary" data-toggle="modal" data-target="#addModal">Add Recipes <span className="glyphicon glyphicon-plus"></span></button>
+      </div>
+    )
+  }
+});
+
+var RecipeList = React.createClass({
+  render: function(){
+    var deleteRecipe = function(index){
+      recipeNodes = recipeNodes.splice(index,1);
+    };
+    var recipes = this.props.items;
+    var recipeNodes = recipes.map(function(recipe){
+        return(
+          <WholeRecipe recipe={recipe} />
+          );
+      });
+      return (
+      <div className="panel-group" id="accordion">
+          {recipeNodes}
+      </div>)
+    }
+});
+
+var WholeRecipe = React.createClass({
+  getInitialState: function() {
+    return {
+      display: "panel panel-default",
+      name: this.props.recipe.name,
+      newName: this.props.recipe.name,
+      ing: this.props.recipe.ing,
+      newIng: this.props.recipe.ing,
+      id: this.props.recipe.idNum
+    }
+  },
+  handleClickDelete: function() {
+    var recs = JSON.parse(localStorage.getItem("_yoej262_item"));
+    recs.splice(this.state.id,1);
+    localStorage.setItem("_yoej262_item",JSON.stringify(recs));
+    this.setState ({
+      display: "panel panel-default hidden"
+    })
+  },
+  getNewRecipe: function(){
+    this.setState({
+      name: this.state.newName,
+      ing: this.state.newIng.split(',')
+    })
+  },
+  getRecipeName: function(e){
+    this.setState({
+      newName: e.target.value
+    })
+  },
+  getIngredientNames: function(e){
+    this.setState({
+      newIng: e.target.value
+    })
+  },
+  
+  makeIdNew: function(){
+    return "Recipe" + this.props.recipe.idNum.toString()
+  },
+  makeId: function(){
+    return "#Recipe" + this.props.recipe.idNum.toString()
+  },
+  render: function(){
+    return (
+    <div className={this.state.display}>
+        <div className="modal fade" id={this.makeIdNew()} role="dialog">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal">&times;</button>
+                <h4>Add Recipe</h4>
+              </div>
+              <div className="modal-body">
+                <form role="from">
+                  <div className="form-group">
+                    <label for="name">Name:</label>
+                    <input require="true" value={this.state.newName} type="name" className="form-control" id="name" onChange={this.getRecipeName}></input>
+                      </div>
+                  <div className="form-group">
+                    <label for="ingredients">Ingredients:</label>
+                    <input value={this.state.newIng} type="ingredients" className="form-control" require="true" id="ingredients"  onChange={this.getIngredientNames}></input>
+                      </div>
+                  <button type="button" className="btn btn-default" onClick={this.getNewRecipe} data-dismiss="modal">Submit</button>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+            <div className= "panel-heading">
+                <h4 className="panel-title">
+                    <Recipe idNum={this.props.recipe.idNum} name={this.state.name} ing={this.state.ing}/>
+                </h4>
+            </div>
+            <div id={this.props.recipe.idNum} className="panel-collapse collapse">
+              <div className="panel-body">
+                  <Ingredients ingList={this.state.ing}/>
+              </div>
+              <div className="panel-footer">
+                <div className="btn-group">
+                  <button onClick={this.handleClickDelete} className="btn btn-danger">Delete</button>
+                  <button className="btn btn-info" data-toggle="modal" data-target={this.makeId()} >Edit</button>
+                </div>
+              </div>
+             </div>
+            </div>
+      )
+  }
+});
+
+var Recipe = React.createClass({
+              
+  makeId: function(name){
+    return "#" + this.props.idNum.toString();
+  },
+  render: function(){
+    return (
+        <a data-toggle="collapse" data-parent="#accordion" href={this.makeId(this.props.idNum)}>{this.props.name}</a>
+   );
+  }
+});
+
+var Ingredients = React.createClass({
+   render: function(){
+     var ls = this.props.ingList.map(function(ingredient){
+      return (
+         <div className="checkbox"><label><input className="large" type="checkbox" value="">{ingredient}</input></label></div>
+        );
+     });
+    return (
+      <form>
+        <h4>Ingredients:</h4>
+        {ls}
+        </form>
+    )
+   }
+});
+
+React.render(<RecipeBox items={items} />, document.getElementById("myDiv"));
